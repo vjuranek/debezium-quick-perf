@@ -1,1 +1,0 @@
-# debezium-quick-perf
