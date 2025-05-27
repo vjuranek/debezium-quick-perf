@@ -5,23 +5,32 @@
 === DBZ app
 
 * compile app:
-`mvn clean package dbz-app/pom.xml`
+
+`mvn clean package -f dbz-app/pom.xml`
+
+* create directiry for storing offset:
+
+`mkdir data`
 
 === Postgres
 
 * Start DB container:
+
 `podman run --rm --name postgres -it -e POSTGRES_PASSWORD=postgres -p 5432:5432 quay.io/debezium/example-postgres:3.2`
 
 * Prepare tables for `pgbench`:
-`pgbench -h 127.0.0.1 -U postgres -i postgres --scale=10`
+
+`PGPASSWORD=postgres pgbench -h 127.0.0.1 -U postgres -i postgres --scale=10`
 
 == Running the test
 
 * run `pgbench`:
-`pgbench -h 127.0.0.1 -U postgres --scale=10 -b simple-update -T 120 postgres`
+
+`PGPASSWORD=postgres pgbench -h 127.0.0.1 -U postgres --scale=10 -b simple-update -T 120 postgres`
 
 * run `dbz-app` with Flight Recorder enabled:
-`java -XX:+FlightRecorder -XX:StartFlightRecording=delay=20s,duration=10s,filename=flight.jfr,settings=profile -jar dbz-app/target/debezium-quick-perf-1.0-SNAPSHOT.jar`
+
+`java -XX:+FlightRecorder -XX:StartFlightRecording=delay=30s,duration=60s,filename=dbz-flight.jfr,settings=profile -jar dbz-app/target/debezium-quick-perf-1.0-SNAPSHOT.jar`
 
 * stop the application and eventually also `pgbench`
 
