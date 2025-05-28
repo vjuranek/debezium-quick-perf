@@ -21,6 +21,7 @@ import io.debezium.connector.postgresql.connection.AbstractReplicationMessageCol
 import io.debezium.connector.postgresql.connection.ReplicationMessage;
 
 /**
+ * Very rough JMH benchmark of Type metadata used in Debezium Postgres connector.
  *
  * @author vjuranek
  */
