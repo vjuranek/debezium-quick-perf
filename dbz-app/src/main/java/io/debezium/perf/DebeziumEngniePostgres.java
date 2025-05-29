@@ -19,7 +19,6 @@ public class DebeziumEngniePostgres {
         final Properties props = new Properties();
         props.setProperty("name", "engine");
         props.setProperty("connector.class", "io.debezium.connector.postgresql.PostgresConnector");
-        //props.setProperty("plugin.name", "pgoutput");
         props.setProperty("database.hostname", "127.0.0.1");
         props.setProperty("database.port", "5432");
         props.setProperty("database.user", "postgres");
