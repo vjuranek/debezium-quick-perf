@@ -1,5 +1,6 @@
-package io.debezium.performance.connector.postgres;
+package io.debezium.perf;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -8,6 +9,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -21,32 +23,49 @@ import io.debezium.connector.postgresql.connection.AbstractReplicationMessageCol
 import io.debezium.connector.postgresql.connection.ReplicationMessage;
 
 /**
- * Very rough JMH benchmark of Type metadata used in Debezium Postgres connector.
+ * Simple JMH benchmark of Type metadata used in Debezium Postgres connector.
  *
  * @author vjuranek
  */
+@State(Scope.Benchmark)
 public class PostgresTypeMetadataPerf {
-    @State(Scope.Thread)
-    public static class ColumnState {
 
-        public ReplicationMessage.Column column;
+    private static final int OP_COUNT = 10;
+    private static final int MOD_COUNT = 10;
+    private static final String[] MODIFIERS = {
+            "text",
+            "character varying(255)",
+            "numeric(12,3)",
+            "geometry(MultiPolygon,4326)",
+            "timestamp (12) with time zone",
+            "int[]",
+            "myschema.geometry",
+            "float[10]",
+            "date",
+            "bytea"
+    };
 
-        @Setup(Level.Invocation)
-        public void doSetup() {
-            column = testColumn();
-        }
+    private ReplicationMessage.Column[] columns = new ReplicationMessage.Column[OP_COUNT];
 
-        private ReplicationMessage.Column testColumn() {
-            String columnName = "test";
-            PostgresType columnType = PostgresType.UNKNOWN;
-            String typeWithModifiers = "character varying(255)";
-            boolean optional = true;
-            return new AbstractReplicationMessageColumn(columnName, columnType, typeWithModifiers, optional) {
-                @Override
-                public Object getValue(PostgresStreamingChangeEventSource.PgConnectionSupplier connection, boolean includeUnknownDatatypes) {
-                    return null;
-                }
-            };
+    private ReplicationMessage.Column createColumn (int modifierIndex) {
+        String columnName = "test";
+        PostgresType columnType = PostgresType.UNKNOWN;
+        String typeWithModifiers = MODIFIERS[modifierIndex];
+        boolean optional = true;
+        return new AbstractReplicationMessageColumn(columnName, columnType, typeWithModifiers, optional) {
+            @Override
+            public Object getValue(PostgresStreamingChangeEventSource.PgConnectionSupplier connection,
+                    boolean includeUnknownDatatypes) {
+                return null;
+            }
+        };
+    }
+
+    @Setup(Level.Invocation)
+    public void setup() {
+        Random random = new Random(1234);
+        for (int i = 0; i < OP_COUNT; i++) {
+            columns[i] = createColumn(random.nextInt(MOD_COUNT));
         }
     }
 
@@ -54,9 +73,10 @@ public class PostgresTypeMetadataPerf {
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Fork(value = 1)
-    @Warmup(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
-    @Measurement(iterations = 10, time = 2, timeUnit = TimeUnit.SECONDS)
-    public void columnMetadata(Blackhole bh, ColumnState state) {
-        bh.consume(state.column.getTypeMetadata());
+    @OperationsPerInvocation(OP_COUNT)
+    public void columnMetadata(Blackhole bh) {
+        for (int i = 0; i < OP_COUNT; i++) {
+            bh.consume(columns[i].getTypeMetadata());
+        }
     }
 }
