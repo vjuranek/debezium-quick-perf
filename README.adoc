@@ -42,11 +42,11 @@ See link:https://bugs.openjdk.org/browse/JMC-8247[JMC-8247].
 
 The flame graph gives us quick overview of the whole run:
 
-image::img/flame_graph_postgres_before.png
+image::img/flame_graph_postgres_before.png[]
 
 You can check it in `Method profiling` view:
 
-image::img/method_profiling.png
+image::img/method_profiling.png[]
 
 == Proposing fix
 
@@ -89,3 +89,5 @@ Iteration  10: 0.054 us/op
 Benchmark                                Mode  Cnt  Score    Error  Units
 PostgresTypeMetadataPerf.columnMetadata  avgt   10  0.054 ?  0.001  us/op
 ```
+
+image::img/flame_graph_postgres_after.png[]
