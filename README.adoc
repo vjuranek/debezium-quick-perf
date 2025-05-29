@@ -26,11 +26,27 @@
 
 * run `pgbench`:
 
-`PGPASSWORD=postgres pgbench -h 127.0.0.1 -U postgres --scale=10 -b simple-update -T 120 postgres`
+`PGPASSWORD=postgres pgbench -h 127.0.0.1 -U postgres --scale=10 -b simple-update --jobs=20 --client=20 -T 120 postgres`
 
 * run `dbz-app` with Flight Recorder enabled:
 
 `java -XX:+FlightRecorder -XX:StartFlightRecording=delay=30s,duration=60s,filename=dbz-flight.jfr,settings=profile -jar dbz-app/target/debezium-quick-perf-1.0-SNAPSHOT.jar`
 
 * stop the application and eventually also `pgbench`
+
+== Analyzing the results
+
+You can analyze the results using tools like Java Mission Control.
+Please note possible issue with displaying flame graphs on systems using link:https://wayland.freedesktop.org/[Wayland].
+See link:https://bugs.openjdk.org/browse/JMC-8247[JMC-8247].
+
+The flame graph gives us quick overview of the whole run:
+
+image::img/flame_graph_postgres_before.png
+
+You can check it in `Method profiling` view:
+
+image::img/method_profiling.png
+
+
 
