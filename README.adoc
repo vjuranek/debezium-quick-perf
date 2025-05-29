@@ -48,5 +48,44 @@ You can check it in `Method profiling` view:
 
 image::img/method_profiling.png
 
+== Proposing fix
+
+=== JMH benchmark
+
+Before:
+
+```
+Iteration   1: 0.768 us/op
+Iteration   2: 0.774 us/op
+Iteration   3: 0.776 us/op
+Iteration   4: 0.764 us/op
+Iteration   5: 0.767 us/op
+Iteration   6: 0.766 us/op
+Iteration   7: 0.785 us/op
+Iteration   8: 0.782 us/op
+Iteration   9: 0.766 us/op
+Iteration  10: 0.773 us/op
+
+Benchmark                                Mode  Cnt  Score   Error  Units
+PostgresTypeMetadataPerf.columnMetadata  avgt   10  0.772 ? 0.011  us/op
+
+```
 
 
+After:
+
+```
+Iteration   1: 0.054 us/op
+Iteration   2: 0.054 us/op
+Iteration   3: 0.054 us/op
+Iteration   4: 0.053 us/op
+Iteration   5: 0.053 us/op
+Iteration   6: 0.053 us/op
+Iteration   7: 0.054 us/op
+Iteration   8: 0.054 us/op
+Iteration   9: 0.054 us/op
+Iteration  10: 0.054 us/op
+
+Benchmark                                Mode  Cnt  Score    Error  Units
+PostgresTypeMetadataPerf.columnMetadata  avgt   10  0.054 ?  0.001  us/op
+```
