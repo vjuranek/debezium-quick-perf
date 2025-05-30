@@ -124,6 +124,9 @@ How it's exactly done depends on the plugin being used, for default `decodebufs`
 Type modifiers are provided as `String` by the pluing and are parsed by Debezium using regular expression.
 As it's done for almost every message, it piles up.
 
+As we found possible bottleneck in the code, it's always good to share the findings with the developers and file a bug for our findings.
+For this one, I created link:https://issues.redhat.com/browse/DBZ-9093[DBZ-9093].
+
 == Proposing fix
 
 In previous step we identified an issue in Postgres connector when `decodebufs` plugin is used.
@@ -140,51 +143,46 @@ On my machine I got following results:
 
 ```
 Iteration   1: 0.768 us/op
-Iteration   2: 0.774 us/op
-Iteration   3: 0.776 us/op
-Iteration   4: 0.764 us/op
-Iteration   5: 0.767 us/op
-Iteration   6: 0.766 us/op
-Iteration   7: 0.785 us/op
-Iteration   8: 0.782 us/op
-Iteration   9: 0.766 us/op
-Iteration  10: 0.773 us/op
+Iteration   2: 0.761 us/op
+Iteration   3: 0.780 us/op
+Iteration   4: 0.780 us/op
+Iteration   5: 0.750 us/op
 
 Benchmark                                Mode  Cnt  Score   Error  Units
-PostgresTypeMetadataPerf.columnMetadata  avgt   10  0.772 ? 0.011  us/op
+PostgresTypeMetadataPerf.columnMetadata  avgt    5  0.768 ? 0.049  us/op
 
 ```
 
-Once we have some base line, we can start thinking about the fix.
+Once we have a base line, we can start thinking about the fix.
 As the type modifiers are same most of the time, probably the most easy way how to fix the issue is to cache them in a map.
 We can verify the fix by re-running JMH benchmark.
 
 The patched version gave me these numbers:
 
 ```
-Iteration   1: 0.054 us/op
-Iteration   2: 0.054 us/op
-Iteration   3: 0.054 us/op
-Iteration   4: 0.053 us/op
-Iteration   5: 0.053 us/op
-Iteration   6: 0.053 us/op
-Iteration   7: 0.054 us/op
-Iteration   8: 0.054 us/op
-Iteration   9: 0.054 us/op
-Iteration  10: 0.054 us/op
+Iteration   1: 0.278 us/op
+Iteration   2: 0.278 us/op
+Iteration   3: 0.284 us/op
+Iteration   4: 0.288 us/op
+Iteration   5: 0.291 us/op
 
-Benchmark                                Mode  Cnt  Score    Error  Units
-PostgresTypeMetadataPerf.columnMetadata  avgt   10  0.054 ?  0.001  us/op
+Benchmark                                Mode  Cnt  Score   Error  Units
+PostgresTypeMetadataPerf.columnMetadata  avgt    5  0.284 ? 0.023  us/op
 ```
 
-We can argue that the benchmark is very simple and most importantly it runs the test only with one new value, but as the improvement is more than a magnitude, we can believe this will improve the throughput also in reality.
+We can argue that the benchmark is very simple and there are possibly few other issues, but as the improvement is quite significant, thus we can believe this will improve the throughput little bit also in the reality.
 
 As the final test we can re-run out simple performance test and check how big part is now consumed by the `schemaChanged()` method.
 If you only visually check the flame graph, you can see obvious improvement:
 
 image::img/flame_graph_postgres_after_highlight.png[]
 
+Once we are done, just send a link:https://github.com/debezium/debezium/pull/6467[pull request], which can in ideal case include also JMH benchmark which was used for testing the patch.
+
 To have higher confidence in the fix, we would need proper end-to-end performance pipeline though.
+However, in end-to-end performance test the effect of such fix will be small, maybe even negligible.
+In JMH test and also in out test application we don't do any serialization, which takes lots of time and overall simplify things.
+So what may look like a big improvement in this simple test may be only small improvement in reality.
 
 == Conclusion
 
