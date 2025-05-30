@@ -3,24 +3,21 @@ package io.debezium.perf;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import io.debezium.connector.postgresql.PostgresStreamingChangeEventSource;
+import io.debezium.connector.postgresql.PostgresType;
+import io.debezium.connector.postgresql.connection.AbstractReplicationMessageColumn;
+import io.debezium.connector.postgresql.connection.ReplicationMessage;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
-import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-
-import io.debezium.connector.postgresql.PostgresStreamingChangeEventSource;
-import io.debezium.connector.postgresql.PostgresType;
-import io.debezium.connector.postgresql.connection.AbstractReplicationMessageColumn;
-import io.debezium.connector.postgresql.connection.ReplicationMessage;
 
 /**
  * Simple JMH benchmark of Type metadata used in Debezium Postgres connector.
