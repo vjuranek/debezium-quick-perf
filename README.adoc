@@ -170,7 +170,7 @@ Benchmark                                Mode  Cnt  Score   Error  Units
 PostgresTypeMetadataPerf.columnMetadata  avgt    5  0.284 ? 0.023  us/op
 ```
 
-We can argue that the benchmark is very simple and there are possibly few other issues, but as the improvement is quite significant, thus we can believe this will improve the throughput little bit also in the reality.
+We can argue that the benchmark is very simple and there are possibly few other issues, but as the improvement is quite significant, we can believe this will improve the throughput little bit also in the reality.
 
 As the final test we can re-run out simple performance test and check how big part is now consumed by the `schemaChanged()` method.
 If you only visually check the flame graph, you can see obvious improvement:
@@ -181,8 +181,8 @@ Once we are done, just send a link:https://github.com/debezium/debezium/pull/646
 
 To have higher confidence in the fix, we would need proper end-to-end performance pipeline though.
 However, in end-to-end performance test the effect of such fix will be small, maybe even negligible.
-In JMH test and also in out test application we don't do any serialization, which takes lots of time and overall simplify things.
-So what may look like a big improvement in this simple test may be only small improvement in reality.
+In JMH test and also in our test application we don't do any serialization, which takes lots of time and overall simplify things.
+So what may look like a big improvement in this simple test may be only a small improvement in the reality.
 
 == Conclusion
 
